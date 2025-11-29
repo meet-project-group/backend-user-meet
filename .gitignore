@@ -1,0 +1,21 @@
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Env files
+.env
+.env.local
+.env.*.local
+
+# Firebase Private Key
+serviceAccountKey.json
+server/serviceAccountKey.json
+
+# Dist / Build
+dist/
+build/
+
+# Logs
+logs
+*.log
