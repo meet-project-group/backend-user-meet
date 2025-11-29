@@ -143,18 +143,24 @@ export async function getUser(req: Request, res: Response) {
  */
 export async function updateUser(req: Request, res: Response) {
   try {
-    const { firstName, lastName, age, email, password, authUid } = req.body;
-    const uid = req.params.uid;
+    const { firstName, lastName, age, email, password } = req.body;
+    const uidParam = req.params.uid;
 
-    // 🚨 Validación: evitar editar cuentas ajenas
-    if (authUid !== uid) {
+    // 1️⃣ Extraer token del header
+    const token = req.headers.authorization?.split(" ")[1];
+
+    if (!token)
+      return res.status(401).json({ message: "Missing token" });
+
+    // 2️⃣ Verificar token con Firebase
+    const decoded = await auth.verifyIdToken(token);
+    const authUid = decoded.uid;
+
+    // 3️⃣ Validación correcta
+    if (authUid !== uidParam)
       return res.status(403).json({ message: "You cannot edit another user" });
-    }
 
-
-    // ---------------------------
-    // 1. Actualizar Firebase Auth (solo si se envían datos)
-    // ---------------------------
+    // 4️⃣ Actualizar Firebase Auth
     const authUpdateData: any = {};
 
     if (email) authUpdateData.email = email;
@@ -162,15 +168,12 @@ export async function updateUser(req: Request, res: Response) {
     if (firstName || lastName)
       authUpdateData.displayName = `${firstName ?? ""} ${lastName ?? ""}`;
 
-    // Solo llamar a updateUser si hay algo que actualizar
     if (Object.keys(authUpdateData).length > 0) {
-      await auth.updateUser(uid, authUpdateData);
+      await auth.updateUser(authUid, authUpdateData);
     }
 
-    // ---------------------------
-    // 2. Actualizar Firestore
-    // ---------------------------
-    await usersRef.doc(uid).update({
+    // 5️⃣ Actualizar Firestore
+    await usersRef.doc(authUid).update({
       firstName,
       lastName,
       age,
@@ -185,6 +188,7 @@ export async function updateUser(req: Request, res: Response) {
     return res.status(500).json({ error: error.message });
   }
 }
+
 
 /**
  * @description Delete user in Auth and Firestore.
