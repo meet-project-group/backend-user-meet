@@ -141,10 +141,6 @@ export async function getUser(req: Request, res: Response) {
  * @description Update user in Auth and Firestore.
  * @route PUT /api/users/:uid
  */
-/**
- * @description Update user in Auth and Firestore.
- * @route PUT /api/users/:uid
- */
 export async function updateUser(req: Request, res: Response) {
   try {
     const { firstName, lastName, age, email, password, authUid } = req.body;
@@ -189,6 +185,7 @@ export async function updateUser(req: Request, res: Response) {
     return res.status(500).json({ error: error.message });
   }
 }
+
 /**
  * @description Delete user in Auth and Firestore.
  * @route DELETE /api/users/:uid
@@ -220,4 +217,3 @@ export async function listUsers(req: Request, res: Response) {
     return res.status(500).json({ error: error.message });
   }
 }
-
